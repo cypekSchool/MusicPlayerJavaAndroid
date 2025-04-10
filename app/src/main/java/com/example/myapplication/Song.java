@@ -20,6 +20,10 @@ import androidx.room.PrimaryKey;
         }
 )
 public class Song {
+    public void setId(int id) {
+        this.id = id;
+    }
+
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String title;
