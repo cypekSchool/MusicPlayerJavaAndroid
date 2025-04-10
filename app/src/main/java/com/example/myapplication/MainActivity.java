@@ -8,17 +8,20 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
     ListView songsLV;
     ArrayAdapter<Song> songsAdapter;
-
+    ArrayList<Song> songsArray;
     PlayerDatabase playerDatabase;
 
     @Override
@@ -49,12 +52,71 @@ public class MainActivity extends AppCompatActivity {
                 "artists"
         ).addCallback(dbCallback).allowMainThreadQueries().build();
 
-
-
         songsLV = findViewById(R.id.songs);
-        songsLV.setAdapter(songsAdapter);
+        songsArray = new ArrayList<>();
+       /* songsAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_list_item_1,
+                songsArray
+        );
 
-        addArtistToDatabase("Kult", "Kultowy zespoół");
+        songsLV.setAdapter(songsAdapter);*/
+
+        displaySongs();
+
+//        ExecutorService executorService = Executors.newSingleThreadExecutor();
+//        executorService.execute(
+//                new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        Artist artist = playerDatabase.getDaoPlayer().getAllArtists().get(0);
+//
+//                        addSongsToDatabase("Ryby", artist);
+//                    }
+//                }
+//        );
+
+
+//        addArtistToDatabase("Kult", "Kultowy zespoół");
+    }
+
+    private void displaySongs() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        List<Song> wszystkie = playerDatabase.getDaoPlayer().getAllSongs();
+                        for (Song song : wszystkie) {
+                            songsArray.add(song);
+                        }
+                       songsAdapter = new ArrayAdapter<>(
+                                MainActivity.this,
+                                android.R.layout.simple_list_item_1,
+                               wszystkie
+                        );
+
+                        songsLV.setAdapter(songsAdapter);
+                        songsAdapter.notifyDataSetChanged();
+
+                    }
+                }
+        );
+    }
+
+    private void addSongsToDatabase(String title, Artist artist) {
+        addSongsToDatabase(title, artist, 0);
+    }
+    private void addSongsToDatabase(String title, Artist artist, int plays) {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        playerDatabase.getDaoPlayer().insertSong(new Song(title, artist.getId(), plays));
+                    }
+                }
+        );
     }
 
     private void addArtistToDatabase(String name, String description) {
