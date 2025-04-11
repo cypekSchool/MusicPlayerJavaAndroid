@@ -19,8 +19,10 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,8 +35,13 @@ public class MainActivity extends AppCompatActivity {
     ListView songsLV;
     ArrayAdapter<Song> songsAdapter;
     ArrayList<Song> songsArray;
+
+    ArrayAdapter<Artist> artistsAdapter;
+    ArrayList<Artist> artistsArray;
+
     PlayerDatabase playerDatabase;
     Button newSongBtn;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +80,27 @@ public class MainActivity extends AppCompatActivity {
                         dialog.setContentView(R.layout.add_song_dialog);
 //                        dialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                         dialog.show();
+
+                        Button cancelBtn = dialog.findViewById(R.id.cancelBtn);
+                        Button saveBtn = dialog.findViewById(R.id.saveBtn);
+                        EditText titleET = dialog.findViewById(R.id.songTitleET);
+                        Spinner artistsSpinner = dialog.findViewById(R.id.artistsSpinner);
+                        cancelBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                dialog.cancel();
+                            }
+                        });
+
+                        saveBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+
+                                addSongsToDatabase();
+                            }
+                        });
+
+
                     }
                 }
         );
@@ -110,22 +138,22 @@ public class MainActivity extends AppCompatActivity {
         );
 
 
-//        addArtistToDatabase("Kult", "Kultowy zespoół");
-//
-//
-//        ExecutorService executorService = Executors.newSingleThreadExecutor();
-//        executorService.execute(
-//                new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Artist artist = playerDatabase.getDaoPlayer().getAllArtists().get(0);
-//
-//                        addSongsToDatabase("Po co wolność", artist);
-//                        addSongsToDatabase("Baranek", artist);
-//                        addSongsToDatabase("Gdy nie ma dzieci", artist);
-//                    }
-//                }
-//        );
+        addArtistToDatabase("Kult", "Kultowy zespoół");
+
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        Artist artist = playerDatabase.getDaoPlayer().getAllArtists().get(0);
+
+                        addSongsToDatabase("Po co wolność", artist);
+                        addSongsToDatabase("Baranek", artist);
+                        addSongsToDatabase("Gdy nie ma dzieci", artist);
+                    }
+                }
+        );
 
         displaySongs();
 
