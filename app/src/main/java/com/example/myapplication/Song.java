@@ -15,11 +15,17 @@ import androidx.room.PrimaryKey;
                         entity = Artist.class,
                         parentColumns = "id",
                         childColumns = "artistId",
-                        onDelete = CASCADE
+                        onDelete = CASCADE,
+                        onUpdate = CASCADE
                 )
         }
 )
 public class Song {
+    @Override
+    public String toString() {
+        return title + " - " + plays + " odtworzeń";
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -31,6 +37,7 @@ public class Song {
     private int plays;
 
     public Song(String title, int artistId, int plays) {
+        this.id = 0;
         this.title = title;
         this.artistId = artistId;
         this.plays = plays;

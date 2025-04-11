@@ -12,6 +12,7 @@ public class Artist {
     private String description;
 
     public Artist(String name, String description) {
+        this.id = 0;
         this.name = name;
         this.description = description;
     }

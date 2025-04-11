@@ -1,16 +1,27 @@
 package com.example.myapplication;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -23,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayAdapter<Song> songsAdapter;
     ArrayList<Song> songsArray;
     PlayerDatabase playerDatabase;
+    Button newSongBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,18 +64,55 @@ public class MainActivity extends AppCompatActivity {
                 "artists"
         ).addCallback(dbCallback).allowMainThreadQueries().build();
 
+        newSongBtn = findViewById(R.id.button);
+        newSongBtn.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Dialog dialog = new Dialog(MainActivity.this);
+                        dialog.setContentView(R.layout.add_song_dialog);
+//                        dialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                        dialog.show();
+                    }
+                }
+        );
+
         songsLV = findViewById(R.id.songs);
         songsArray = new ArrayList<>();
-       /* songsAdapter = new ArrayAdapter<>(
-                this,
+        songsAdapter = new ArrayAdapter<>(
+                MainActivity.this,
                 android.R.layout.simple_list_item_1,
                 songsArray
         );
 
-        songsLV.setAdapter(songsAdapter);*/
+        songsLV.setAdapter(songsAdapter);
 
-        displaySongs();
+        songsLV.setOnItemLongClickListener(
+                new AdapterView.OnItemLongClickListener() {
+                    @Override
+                    public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        Song song = songsArray.get(i);
+                        ExecutorService executorService = Executors.newSingleThreadExecutor();
+                        executorService.execute(
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        playerDatabase.getDaoPlayer().deleteSong(song);
+                                        songsArray.clear();
+                                        songsArray.addAll(playerDatabase.getDaoPlayer().getAllSongs());
+//                                        songsAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                        );
+                        return false;
+                    }
+                }
+        );
 
+
+//        addArtistToDatabase("Kult", "Kultowy zespoół");
+//
+//
 //        ExecutorService executorService = Executors.newSingleThreadExecutor();
 //        executorService.execute(
 //                new Runnable() {
@@ -71,32 +120,28 @@ public class MainActivity extends AppCompatActivity {
 //                    public void run() {
 //                        Artist artist = playerDatabase.getDaoPlayer().getAllArtists().get(0);
 //
-//                        addSongsToDatabase("Ryby", artist);
+//                        addSongsToDatabase("Po co wolność", artist);
+//                        addSongsToDatabase("Baranek", artist);
+//                        addSongsToDatabase("Gdy nie ma dzieci", artist);
 //                    }
 //                }
 //        );
 
+        displaySongs();
 
-//        addArtistToDatabase("Kult", "Kultowy zespoół");
     }
 
+
     private void displaySongs() {
+        songsArray.clear();
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(
                 new Runnable() {
                     @Override
                     public void run() {
-                        List<Song> wszystkie = playerDatabase.getDaoPlayer().getAllSongs();
-                        for (Song song : wszystkie) {
-                            songsArray.add(song);
-                        }
-                       songsAdapter = new ArrayAdapter<>(
-                                MainActivity.this,
-                                android.R.layout.simple_list_item_1,
-                               wszystkie
-                        );
 
-                        songsLV.setAdapter(songsAdapter);
+                        songsArray.addAll(playerDatabase.getDaoPlayer().getAllSongs());
+
                         songsAdapter.notifyDataSetChanged();
 
                     }
