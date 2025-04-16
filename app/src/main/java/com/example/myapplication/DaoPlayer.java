@@ -34,6 +34,9 @@ public interface DaoPlayer {
     @Query("SELECT * FROM songs")
     public List<Song> getAllSongs();
 
+    @Query("SELECT * FROM artists WHERE name=:name")
+    public Artist getArtist(String name);
+
 //    @Query("SELECT * FROM artists WHERE name LIKE :namePattern")
 //    public List<Song> getArtist(String namePattern);
 }

@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+
         playerDatabase = Room.databaseBuilder(
                 MainActivity.this,
                 PlayerDatabase.class,
@@ -84,7 +85,18 @@ public class MainActivity extends AppCompatActivity {
                         Button cancelBtn = dialog.findViewById(R.id.cancelBtn);
                         Button saveBtn = dialog.findViewById(R.id.saveBtn);
                         EditText titleET = dialog.findViewById(R.id.songTitleET);
+
+                        titleET.getText().toString();
+
                         Spinner artistsSpinner = dialog.findViewById(R.id.artistsSpinner);
+                        ArrayAdapter<Artist> artistsAdapter = new ArrayAdapter<>(
+                                getApplicationContext(),
+                                android.R.layout.simple_spinner_dropdown_item,
+                                artistsArray
+                        );
+                        artistsSpinner.setAdapter(artistsAdapter);
+
+
                         cancelBtn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -96,7 +108,28 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(View view) {
 
-                                addSongsToDatabase();
+                                ExecutorService executorService = Executors.newSingleThreadExecutor();
+                                executorService.execute(
+                                        new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Spinner artistSpinner = dialog.findViewById(R.id.artistsSpinner);
+                                                Artist artist = playerDatabase.getDaoPlayer().getArtist(artistSpinner.getSelectedItem().toString());
+
+                                                EditText titleET = dialog.findViewById(R.id.songTitleET);
+
+                                                String title = titleET.getText().toString();
+
+
+
+                                                addSongsToDatabase(title, artist);
+
+                                                dialog.cancel();
+                                            }
+                                        }
+                                );
+
+
                             }
                         });
 
@@ -104,6 +137,10 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        artistsArray = new ArrayList<>();
+
+
 
         songsLV = findViewById(R.id.songs);
         songsArray = new ArrayList<>();
@@ -138,19 +175,27 @@ public class MainActivity extends AppCompatActivity {
         );
 
 
-        addArtistToDatabase("Kult", "Kultowy zespoół");
-
-
+//        addArtistToDatabase("Budka Suflera", "Polski zespół rokowy");
+//
+//
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.execute(
                 new Runnable() {
                     @Override
                     public void run() {
-                        Artist artist = playerDatabase.getDaoPlayer().getAllArtists().get(0);
+
+                        artistsArray.addAll(playerDatabase.getDaoPlayer().getAllArtists());
+
+
+                        /*Artist artist = playerDatabase.getDaoPlayer().getAllArtists().get(0);
+
+
+                        n
+
 
                         addSongsToDatabase("Po co wolność", artist);
                         addSongsToDatabase("Baranek", artist);
-                        addSongsToDatabase("Gdy nie ma dzieci", artist);
+                        addSongsToDatabase("Gdy nie ma dzieci", artist);*/
                     }
                 }
         );
